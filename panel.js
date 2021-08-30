@@ -15,39 +15,79 @@ cacheModeSelect.addEventListener('change', () => {
 
 const loadFileExtensionButton = document.getElementById('loadFileExtensionButton');
 loadFileExtensionButton.addEventListener('click', () => {
-  fetchFile(urlInput.value);
+  const loadFileExtensionStatus = document.getElementById('loadFileExtensionStatus');
+
+  performance.mark('loadFileExtension-start');
+
+  fetch(urlInput.value, fetchOptions).then(
+    text => {
+      performance.mark('loadFileExtension-end');
+      performance.measure('loadFileExtension', 'loadFileExtension-start', 'loadFileExtension-end');
+
+      loadFileExtensionStatus.innerText = 'Status: Success';
+    },
+    error => {
+      performance.mark('loadFileExtension-end');
+      performance.measure('loadFileExtension', 'loadFileExtension-start', 'loadFileExtension-end');
+
+      loadFileExtensionStatus.innerText = `Status: ${error.message}`;
+    });
 });
 
 const loadFileWorkerButton = document.getElementById('loadFileWorkerButton');
 loadFileWorkerButton.addEventListener('click', () => {
+  const loadFileWorkerStatus = document.getElementById('loadFileWorkerStatus');
+  const onMessage = ({data}) => {
+    switch (data.type) {
+      case 'fetch-file-error':
+        worker.removeEventListener('message', onMessage);
+
+        performance.mark('loadFilePage-end');
+        performance.measure('loadFilePage', 'loadFilePage-start', 'loadFilePage-end');
+
+        loadFileWorkerStatus.innerText = `Status: ${data.value}`;
+
+        console.error('loadFilePage() failed:', data.value);
+        break;
+      case 'fetch-file-complete':
+        worker.removeEventListener('message', onMessage);
+
+        performance.mark('loadFilePage-end');
+        performance.measure('loadFilePage', 'loadFilePage-start', 'loadFilePage-end');
+
+        loadFileWorkerStatus.innerText = 'Status: Success';
+        break;
+    }
+  };
+
+  worker.addEventListener('message', onMessage);
+
   worker.postMessage({ type: 'fetch-file', value: urlInput.value });
 });
 
-function fetchFile(url) {
-  performance.mark('loadFileExtension-start');
-  fetch(url, fetchOptions).then(text => {
-    performance.mark('loadFileExtension-end');
-    performance.measure('loadFileExtension', 'loadFileExtension-start', 'loadFileExtension-end');
-    console.log('loadFileExtension() text:', text);
-  });
-}
-
 const loadFilePageButton = document.getElementById('loadFilePageButton');
 loadFilePageButton.addEventListener('click', () => {
+  const loadFilePageStatus = document.getElementById('loadFilePageStatus');
+
   const onMessage = message => {
-    console.log('[panel] backgroundPageConnection.onMessage() message:', message);
     switch (message.type) {
       case 'fetch-file-error':
+        backgroundPageConnection.onMessage.removeListener(onMessage);
+
         performance.mark('loadFilePage-end');
         performance.measure('loadFilePage', 'loadFilePage-start', 'loadFilePage-end');
+
+        loadFilePageStatus.innerText = `Status: ${message.value}`;
+
         console.error('loadFilePage() failed:', message.value);
-        backgroundPageConnection.onMessage.removeListener(onMessage);
         break;
       case 'fetch-file-complete':
+        backgroundPageConnection.onMessage.removeListener(onMessage);
+
         performance.mark('loadFilePage-end');
         performance.measure('loadFilePage', 'loadFilePage-start', 'loadFilePage-end');
-        console.log('loadFilePage() text:', message.value);
-        backgroundPageConnection.onMessage.removeListener(onMessage);
+
+        loadFilePageStatus.innerText = 'Status: Success';
         break;
     }
   };

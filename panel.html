@@ -6,17 +6,27 @@
     <select id="cacheModeSelect">
       <option>default</option>
       <option>force-cache</option>
+      <option>only-if-cached</option>
     </select>
 
     <br/><br/>
 
-    <input id="urlInput" type="text" placeholder="URL to load" value="https://unpkg.com/jquery@3.6.0/dist/jquery.js"/>
+    <input id="urlInput" type="text" placeholder="URL to load" size="100" value="https://unpkg.com/jquery@3.6.0/dist/jquery.js"/>
 
     <br/><br/>
 
     <button id="loadFilePageButton">Load file in page</button>
+    <div id="loadFilePageStatus">Status: ...</div>
+
+    <br />
+
     <button id="loadFileExtensionButton">Load file in extension</button>
+    <div id="loadFileExtensionStatus">Status: ...</div>
+
+    <br />
+
     <button id="loadFileWorkerButton">Load file from worker</button>
+    <div id="loadFileWorkerStatus">Status: ...</div>
 
     <script type="text/javascript" src="panel.js"></script>
   </body>

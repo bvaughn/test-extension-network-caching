@@ -15,9 +15,29 @@ self.addEventListener('message', ({data}) => {
 
 function fetchFile(url) {
   performance.mark('loadFileWorker-start');
-  fetch(url, fetchOptions).then(text => {
-    performance.mark('loadFileWorker-end');
-    performance.measure('loadFileWorker', 'loadFileWorker-start', 'loadFileWorker-end');
-    console.log('loadFileWorker() text:', text);
-  });
+
+  const reject = message => {
+    self.postMessage({
+      type: 'fetch-file-error',
+      value: message,
+    });
+  };
+
+  const resolve = text => {
+    self.postMessage({
+      type: 'fetch-file-complete',
+      value: text,
+    });
+  };
+
+  fetch(url, fetchOptions).then(
+    response => {
+      if (response.ok) {
+        response.text().then(resolve);
+      } else {
+        reject('Response not okay');
+      }
+    },
+    error => reject(error.message)
+  );
 }

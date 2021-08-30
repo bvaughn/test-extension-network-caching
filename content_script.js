@@ -1,8 +1,3 @@
-const port = chrome.runtime.connect({name: "content-script"});
-port.onMessage.addListener(message => {
-  console.log('[content_script] port.onMessage()', message);
-});
-
 window.addEventListener("message", event => {
   if (event.data.type === "fetch-file") {
     const url = event.data.value;
