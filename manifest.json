@@ -1,0 +1,29 @@
+{
+  "version": "1.0",
+  "manifest_version": 2,
+  "name": "Network caching test",
+  "web_accessible_resources": [
+    "panel.html"
+  ],
+  "permissions": [
+    "<all_urls>"
+  ],
+  "devtools_page": "devtools_page.html",
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content_script.js"
+      ],
+      "run_at": "document_start"
+    }
+  ]
+}

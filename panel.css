@@ -1,0 +1,37 @@
+html {
+  display: flex;
+}
+
+body {
+  display: flex;
+  flex: 1;
+  margin: 0;
+  padding: 0;
+}
+
+.Root {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: auto;
+
+  background-color: #eee;
+  color: #333;
+}
+
+.ListItem {
+  display: flex;
+  align-items: center;
+  padding-left: 0.5rem;
+  outline: none;
+  border: none;
+}
+.ListItem:hover {
+  background: lightyellow;
+}
