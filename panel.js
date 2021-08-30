@@ -4,7 +4,7 @@ const fetchOptions = {
   cache: 'default',
 };
 
-const URL = 'https://unpkg.com/jquery@3.6.0/dist/jquery.js';
+const urlInput = document.getElementById('urlInput');
 
 const cacheModeSelect = document.getElementById('cacheModeSelect');
 cacheModeSelect.addEventListener('change', () => {
@@ -15,12 +15,12 @@ cacheModeSelect.addEventListener('change', () => {
 
 const loadFileExtensionButton = document.getElementById('loadFileExtensionButton');
 loadFileExtensionButton.addEventListener('click', () => {
-  fetchFile(URL);
+  fetchFile(urlInput.value);
 });
 
 const loadFileWorkerButton = document.getElementById('loadFileWorkerButton');
 loadFileWorkerButton.addEventListener('click', () => {
-  worker.postMessage({ type: 'fetch-file', value: URL });
+  worker.postMessage({ type: 'fetch-file', value: urlInput.value });
 });
 
 function fetchFile(url) {
@@ -34,24 +34,28 @@ function fetchFile(url) {
 
 const loadFilePageButton = document.getElementById('loadFilePageButton');
 loadFilePageButton.addEventListener('click', () => {
+  const onMessage = message => {
+    console.log('[panel] backgroundPageConnection.onMessage() message:', message);
+    switch (message.type) {
+      case 'fetch-file-error':
+        performance.mark('loadFilePage-end');
+        performance.measure('loadFilePage', 'loadFilePage-start', 'loadFilePage-end');
+        console.error('loadFilePage() failed:', message.value);
+        backgroundPageConnection.onMessage.removeListener(onMessage);
+        break;
+      case 'fetch-file-complete':
+        performance.mark('loadFilePage-end');
+        performance.measure('loadFilePage', 'loadFilePage-start', 'loadFilePage-end');
+        console.log('loadFilePage() text:', message.value);
+        backgroundPageConnection.onMessage.removeListener(onMessage);
+        break;
+    }
+  };
+
+  backgroundPageConnection.onMessage.addListener(onMessage);
+
   performance.mark('loadFilePage-start');
   chrome.devtools.inspectedWindow.eval(`
-    window.postMessage({ type: 'fetch-file', value: "${URL}" });
+    window.postMessage({ type: 'fetch-file', value: "${urlInput.value}" });
   `);
-});
-
-window.addEventListener("message", ({data}) => {
-  console.log('[panel] "message" data:', data);
-  switch (data.type) {
-    case 'fetch-failed':
-      performance.mark('loadFilePage-end');
-      performance.measure('loadFilePage', 'loadFilePage-start', 'loadFilePage-end');
-      console.error('loadFilePage() failed:', data.value);
-      break;
-    case 'fetched-file':
-      performance.mark('loadFilePage-end');
-      performance.measure('loadFilePage', 'loadFilePage-start', 'loadFilePage-end');
-      console.log('loadFilePage() text:', data.value.length);
-      break;
-  }
 });

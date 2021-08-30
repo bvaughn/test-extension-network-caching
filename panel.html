@@ -1,11 +1,18 @@
 <!DOCTYPE html>
-<html style="display: flex">
+<html style="display: flex; background-color: #333; color: #fff;">
   <head></head>
   <body>
+    Cache mode:
     <select id="cacheModeSelect">
       <option>default</option>
       <option>force-cache</option>
     </select>
+
+    <br/><br/>
+
+    <input id="urlInput" type="text" placeholder="URL to load" value="https://unpkg.com/jquery@3.6.0/dist/jquery.js"/>
+
+    <br/><br/>
 
     <button id="loadFilePageButton">Load file in page</button>
     <button id="loadFileExtensionButton">Load file in extension</button>

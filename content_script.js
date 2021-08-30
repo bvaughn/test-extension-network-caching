@@ -4,17 +4,35 @@ port.onMessage.addListener(message => {
 });
 
 window.addEventListener("message", event => {
-  // Only accept messages from the same frame
-  if (event.source !== window) {
-    return;
+  if (event.data.type === "fetch-file") {
+    const url = event.data.value;
+
+    const reject = value => {
+      chrome.runtime.sendMessage({
+        type: 'fetch-file-error',
+        value,
+      });
+    };
+
+    const resolve = value => {
+      chrome.runtime.sendMessage({
+        type: 'fetch-file-complete',
+        value,
+      });
+    };
+
+    fetch(url, {cache: 'force-cache'}).then(
+      response => {
+        if (response.ok) {
+          response
+            .text()
+            .then(text => resolve(text))
+            .catch(error => reject(null));
+        } else {
+          reject(null);
+        }
+      },
+      error => reject(null),
+    );
   }
-
-  const message = event.data;
-
-  // Only accept messages that we know are ours
-  if (typeof message !== 'object' || message === null || !message.source === 'test-page') {
-    return;
-  }
-
-  chrome.runtime.sendMessage(message);
 });

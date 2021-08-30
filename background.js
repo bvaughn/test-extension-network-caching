@@ -1,6 +1,12 @@
 chrome.runtime.onConnect.addListener(function(devToolsConnection) {
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    devToolsConnection.postMessage(request)
+    switch (request.type) {
+      case 'fetch-file-complete':
+      case 'fetch-file-error':
+        console.log('[background] chrome.runtime.onMessage() -> devToolsConnection.postMessage()', request);
+        devToolsConnection.postMessage(request);
+        break;
+    }
   });
 })
 
